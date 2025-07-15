@@ -1,3 +1,5 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: MIT
 FROM python:3.13-slim
 
 # Create a non-root user and set home directory
