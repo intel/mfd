@@ -1,0 +1,49 @@
+name: 'Prepare test environment'
+inputs:
+  PYTHON_VERSION:
+    description: 'Python version to use'
+    required: true
+  SOURCE_PATH:
+    description: 'Path to the source code directory'
+    required: false
+    default: 'src'
+    type: string
+  BRANCH_NAME:
+    description: 'Branch name to checkout'
+    required: true
+    type: string
+  REPOSITORY_NAME:
+    description: 'Repository name'
+    required: false
+    type: string
+  VIRTUALENV_PATH:
+    description: 'Virtualenv path'
+    required: false
+    default: 'virtualenv'
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+  - name: Checkout main repository
+    uses: actions/checkout@v4
+    with:
+      path: ${{ inputs.SOURCE_PATH }}
+      repository: ${{ inputs.REPOSITORY_NAME }}
+
+  - name: Set up Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: ${{ inputs.PYTHON_VERSION }}
+      cache: 'pip'
+
+  - name: Install dependencies
+    shell: bash
+    run: |
+      python -m pip install --upgrade pip
+      python -m venv ${{ inputs.VIRTUALENV_PATH }}
+      source ${{ inputs.VIRTUALENV_PATH }}/*/activate
+      python --version
+      pip install -r ${{ inputs.SOURCE_PATH }}/requirements-test.txt
+      pip install -r ${{ inputs.SOURCE_PATH }}/requirements-dev.txt
+      pip install -r ${{ inputs.SOURCE_PATH }}/requirements.txt

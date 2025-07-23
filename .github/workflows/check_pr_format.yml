@@ -1,0 +1,53 @@
+name: Title + Commit Validation
+on:
+  workflow_call:
+    inputs:
+      REPOSITORY_NAME:
+        description: 'Repository name'
+        required: false
+        type: string
+      BRANCH_NAME:
+        description: 'Branch name to checkout'
+        required: true
+        type: string
+jobs:
+  validate_pr_title:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.BRANCH_NAME }}
+          repository: ${{ inputs.REPOSITORY_NAME }}
+
+      - name: PR Conventional Title Validation
+        uses: ytanikin/pr-conventional-commits@1.4.0
+        with:
+          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
+          add_label: 'false'
+
+  validate_commit_msg:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.BRANCH_NAME }}
+          repository: ${{ inputs.REPOSITORY_NAME }}
+
+      - name: Verify commit message
+        run: |
+          # Get the last commit message
+          commit_message=$(git log -1 --pretty=format:"%s %b")
+
+          # Define the regex pattern
+          pattern='^(feat|fix|docs|test|ci|refactor|perf|chore|revert):\s+.+Signed-off-by:\s+.+'
+
+          # Check the last commit message against the pattern
+          if ! [[ "$commit_message" =~ $pattern ]]; then
+            echo "Last commit message '$commit_message' does not match the required pattern: '$pattern'"
+            echo "$commit_message"
+            exit 1
+          else
+            echo "Commit message is valid: $commit_message"
+          fi

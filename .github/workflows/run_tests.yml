@@ -1,0 +1,138 @@
+name: Run Tests (ut + ft)
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: 'GitHub token for authentication'
+        required: true
+    inputs:
+      PYTHON_VERSION:
+        description: 'Python version to use'
+        required: false
+        default: '3.10.11'
+        type: string
+      PROJECT_NAME:
+        description: 'Project name for tests'
+        required: true
+        type: string
+      RUNS_ON:
+        description: 'Runner type for the job'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      SOURCE_PATH:
+        description: 'Path to the source code directory'
+        required: false
+        default: 'src'
+        type: string
+      REPOSITORY_NAME:
+        description: 'Repository name'
+        required: false
+        type: string
+      TARGET_BRANCH:
+        description: 'Target branch name'
+        required: false
+        default: 'main'
+        type: string
+      BRANCH_NAME:
+        description: 'Branch name to checkout'
+        required: true
+        type: string
+      VIRTUALENV_PATH:
+        description: 'Virtualenv path'
+        required: false
+        default: 'virtualenv'
+        type: string
+
+jobs:
+  get_tests_to_run:
+    runs-on: "ubuntu-latest"
+    outputs:
+      run_unit_tests: ${{ steps.tests_path_existence.outputs.run_unit_tests }}
+      run_functional_tests: ${{ steps.tests_path_existence.outputs.run_functional_tests }}
+    steps:
+    - name: Checkout this repository
+      uses: actions/checkout@v4
+      with:
+        path: ${{ inputs.SOURCE_PATH }}
+
+    - name: Determine if unit and functional tests should run
+      id: tests_path_existence
+      shell: bash
+      run: |
+          UNIT_TEST_DIR="${{ inputs.SOURCE_PATH }}/tests/unit/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
+          FUNC_TEST_DIR="${{ inputs.SOURCE_PATH }}/tests/system/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
+
+          if [ -d "$UNIT_TEST_DIR" ]; then
+          echo "Unit tests directory exists: $UNIT_TEST_DIR"
+          echo "run_unit_tests=true" >> $GITHUB_OUTPUT
+          else
+          echo "Unit tests directory does not exist: $UNIT_TEST_DIR"
+          echo "run_unit_tests=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -d "$FUNC_TEST_DIR" ]; then
+          echo "Functional tests directory exists: $FUNC_TEST_DIR"
+          echo "run_functional_tests=true" >> $GITHUB_OUTPUT
+          else
+          echo "Functional tests directory does not exist: $FUNC_TEST_DIR"
+          echo "run_functional_tests=false" >> $GITHUB_OUTPUT
+          fi
+
+  run_ft_tests:
+    name: run_ft_tests_${{ inputs.RUNS_ON }}
+    needs: get_tests_to_run
+    if: ${{ needs.get_tests_to_run.outputs.run_functional_tests == 'true' }}
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+    - name: Checkout mfd-common repository
+      uses: actions/checkout@v4
+      with:
+        repository: intel/mfd
+        ref: main
+        token: ${{ secrets.GH_TOKEN }}
+        path: common_actions
+    - uses: ./common_actions/.github/prepare_test_env
+      with:
+        PYTHON_VERSION: ${{ inputs.PYTHON_VERSION }}
+        BRANCH_NAME: ${{ inputs.BRANCH_NAME }}
+        REPOSITORY_NAME: ${{ inputs.REPOSITORY_NAME }}
+    - name: Run Functional Tests
+      shell: bash
+      run: |
+        source ${{ inputs.VIRTUALENV_PATH }}/*/activate
+        pushd ${{ inputs.SOURCE_PATH }}
+        mfd-system-tests --project-dir .
+
+  run_ut_tests:
+    name: run_ut_tests_${{ inputs.RUNS_ON }}
+    needs: get_tests_to_run
+    if: ${{ needs.get_tests_to_run.outputs.run_unit_tests == 'true' }}
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+    - name: Checkout mfd-common repository
+      uses: actions/checkout@v4
+      with:
+        repository: intel/mfd
+        ref: main
+        token: ${{ secrets.GH_TOKEN }}
+        path: common_actions
+    - uses: ./common_actions/.github/prepare_test_env
+      with:
+        PYTHON_VERSION: ${{ inputs.PYTHON_VERSION }}
+        BRANCH_NAME: ${{ inputs.BRANCH_NAME }}
+        REPOSITORY_NAME: ${{ inputs.REPOSITORY_NAME }}
+    - name: Run Unit Tests
+      shell: bash
+      run: |
+        pushd ${{ inputs.SOURCE_PATH }}
+        git fetch && git checkout ${{ inputs.TARGET_BRANCH }} && git checkout ${{ inputs.BRANCH_NAME }}
+        popd
+        source ${{ inputs.VIRTUALENV_PATH }}/*/activate
+        python --version
+        pushd ${{ inputs.SOURCE_PATH }}
+        mfd-unit-tests-with-coverage --project-dir .
+
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b #v2.3.6
