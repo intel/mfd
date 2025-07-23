@@ -1,0 +1,21 @@
+name: Dependency Review
+on:
+  workflow_call:
+    inputs:
+      RUNS_ON:
+        description: 'Runner type for the job'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  dependency_review:
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@v4

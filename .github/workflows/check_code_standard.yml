@@ -1,0 +1,58 @@
+name: Check Code Standard
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: 'GitHub token for authentication'
+        required: true
+    inputs:
+      PYTHON_VERSION:
+        description: 'Python version to use'
+        required: false
+        default: '3.10.11'
+        type: string
+      SOURCE_PATH:
+        description: 'Path to the source code directory'
+        required: false
+        default: 'src'
+        type: string
+      RUNS_ON:
+        description: 'Runner type for the job'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+      REPOSITORY_NAME:
+        description: 'Repository name'
+        required: false
+        type: string
+      BRANCH_NAME:
+        description: 'Branch name to checkout'
+        required: true
+        type: string
+      VIRTUALENV_PATH:
+        description: 'Virtualenv path'
+        required: false
+        default: 'virtualenv'
+        type: string
+
+jobs:
+  run_check_standard:
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+      - name: Checkout mfd-common repository
+        uses: actions/checkout@v4
+        with:
+          repository: intel/mfd
+          ref: main
+          token: ${{ secrets.GH_TOKEN }}
+          path: common_actions
+      - uses: ./common_actions/.github/prepare_test_env
+        with:
+          PYTHON_VERSION: ${{ inputs.PYTHON_VERSION }}
+          BRANCH_NAME: ${{ inputs.BRANCH_NAME }}
+          REPOSITORY_NAME: ${{ inputs.REPOSITORY_NAME }}
+      - name: Run mfd-code-standard
+        shell: bash
+        run: |
+          source ${{ github.workspace }}/${{ inputs.VIRTUALENV_PATH }}/*/activate
+          mfd-code-standard --project-dir ${{ github.workspace }}/${{ inputs.SOURCE_PATH }}

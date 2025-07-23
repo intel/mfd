@@ -1,0 +1,46 @@
+name: Publish Release
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: 'GitHub token for authentication'
+        required: true
+    inputs:
+      RUNS_ON:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      SOURCE_PATH:
+        description: 'Path to the source code directory'
+        required: false
+        default: 'src'
+        type: string
+      REPOSITORY_NAME:
+        description: 'Repository name'
+        required: false
+        type: string
+      BRANCH_NAME:
+        description: 'Branch name to checkout'
+        required: true
+        type: string
+
+
+jobs:
+  push_release:
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+        fetch-depth: 0
+        ref: ${{ inputs.BRANCH_NAME }}
+        repository: ${{ inputs.REPOSITORY_NAME }}
+    - name: Run python-semantic-release
+      uses: python-semantic-release/python-semantic-release@v10.2.0
+      with:
+        build: true
+        vcs_release: true
+        push: true
+        github_token: ${{ secrets.GH_TOKEN }}
+        strict: true

@@ -1,0 +1,44 @@
+
+name: CI Build
+
+on:
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: 'GitHub token for authentication'
+        required: true
+    inputs:
+      REPOSITORY_NAME:
+        description: 'Repository name'
+        required: false
+        type: string
+      BRANCH_NAME:
+        description: 'Branch name to checkout'
+        required: true
+        type: string
+      PYTHON_VERSION:
+        description: 'Python version to use'
+        required: false
+        default: '3.10.11'
+        type: string
+      PROJECT_NAME:
+        description: 'Project name for tests'
+        required: true
+        type: string
+      RUNS_ON:
+        description: 'Runner type for the job'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+
+jobs:
+  build_whl:
+    uses: ./.github/workflows/build_upload_whl.yml
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    with:
+      REPOSITORY_NAME: ${{ inputs.REPOSITORY_NAME }}
+      BRANCH_NAME: ${{ inputs.BRANCH_NAME }}
+      PYTHON_VERSION: ${{ inputs.PYTHON_VERSION }}
+      RELEASE_BUILD: true
+      PROJECT_NAME: ${{ inputs.PROJECT_NAME }}
