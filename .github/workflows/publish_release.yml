@@ -36,6 +36,10 @@ jobs:
         fetch-depth: 0
         ref: ${{ inputs.BRANCH_NAME }}
         repository: ${{ inputs.REPOSITORY_NAME }}
+    - name: Run mfd-create-config-files
+      run: |
+        pip install -r requirements-dev.txt
+        mfd-create-config-files --project-dir .
     - name: Run python-semantic-release
       uses: python-semantic-release/python-semantic-release@v10.2.0
       with:
