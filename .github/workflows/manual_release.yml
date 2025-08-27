@@ -55,7 +55,7 @@ jobs:
       JOB_NAME: 'publish_pypi'
   publish_release:
     needs: publish_pypi
-    if: ${{ inputs.RELEASE_STEPS }}
+    if: ${{ inputs.RELEASE_STEPS && always() }}
     uses: intel/mfd/.github/workflows/publish_release.yml@main
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
