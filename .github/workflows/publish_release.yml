@@ -41,10 +41,32 @@ jobs:
         pip install -r requirements-dev.txt
         mfd-create-config-files --project-dir .
     - name: Run python-semantic-release
-      uses: python-semantic-release/python-semantic-release@v10.2.0
+      id: semantic_release
+      uses: python-semantic-release/python-semantic-release@v10.3.1
       with:
-        build: true
+        build: false
         vcs_release: true
         push: true
+        commit: false
         github_token: ${{ secrets.GH_TOKEN }}
         strict: true
+        verbosity: 2      
+    - name: Get old/new versions from semantic-release
+      run: |
+        echo "PREV_VERSION=${{ steps.semantic_release.outputs.previous_version }}" >> $GITHUB_ENV
+        echo "NEW_VERSION=${{ steps.semantic_release.outputs.version }}" >> $GITHUB_ENV        
+    - name: Run mfd-delete-config-files
+      run: mfd-delete-config-files --project-dir .
+    - name: Update version in pyproject.toml
+      run: |
+        sed "s/$PREV_VERSION/$NEW_VERSION/" -i pyproject.toml
+    - name: Commit and push changes  
+      run: |
+        git config --local user.email "mfd_intel_bot@intel.com"
+        git config --local user.name "mfd-intel-bot"
+        git add pyproject.toml CHANGELOG.md
+        git commit -s -m "chore: Release v$NEW_VERSION"
+        git tag -f v$NEW_VERSION
+        git push origin ${{ inputs.BRANCH_NAME }} --force
+        git push origin v$NEW_VERSION --force
+        

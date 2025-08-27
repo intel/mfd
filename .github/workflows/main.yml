@@ -33,6 +33,7 @@ on:
 
 jobs:
   build_whl:
+    if: github.actor != 'mfd-intel-bot'
     uses: ./.github/workflows/build_upload_whl.yml
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
