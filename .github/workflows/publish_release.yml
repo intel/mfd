@@ -34,6 +34,7 @@ jobs:
       with:
         fetch-tags: true
         fetch-depth: 0
+        token: ${{ secrets.GH_TOKEN }}
         ref: ${{ inputs.BRANCH_NAME }}
         repository: ${{ inputs.REPOSITORY_NAME }}
     - name: Run mfd-create-config-files
@@ -60,7 +61,7 @@ jobs:
     - name: Update version in pyproject.toml
       run: |
         sed "s/$PREV_VERSION/$NEW_VERSION/" -i pyproject.toml
-    - name: Commit and push changes  
+    - name: Commit and push changes
       run: |
         git config --local user.email "mfd_intel_bot@intel.com"
         git config --local user.name "mfd-intel-bot"
