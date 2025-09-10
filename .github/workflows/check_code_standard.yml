@@ -2,9 +2,10 @@ name: Check Code Standard
 on:
   workflow_call:
     secrets:
+      # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
       GH_TOKEN:
         description: 'GitHub token for authentication'
-        required: true
+        required: false
     inputs:
       PYTHON_VERSION:
         description: 'Python version to use'
@@ -44,7 +45,6 @@ jobs:
         with:
           repository: intel/mfd
           ref: main
-          token: ${{ secrets.GH_TOKEN }}
           path: common_actions
       - uses: ./common_actions/.github/prepare_test_env
         with:

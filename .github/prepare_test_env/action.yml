@@ -8,10 +8,12 @@ inputs:
     required: false
     default: 'src'
     type: string
+  # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
   BRANCH_NAME:
     description: 'Branch name to checkout'
-    required: true
+    required: false
     type: string
+  # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
   REPOSITORY_NAME:
     description: 'Repository name'
     required: false
@@ -29,8 +31,7 @@ runs:
     uses: actions/checkout@v4
     with:
       path: ${{ inputs.SOURCE_PATH }}
-      repository: ${{ inputs.REPOSITORY_NAME }}
-
+      fetch-depth: 0
   - name: Set up Python
     uses: actions/setup-python@v5
     with:
