@@ -27,18 +27,15 @@ on:
         required: false
         default: 'src'
         type: string
+      # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
       REPOSITORY_NAME:
         description: 'Repository name'
         required: false
         type: string
-      TARGET_BRANCH:
-        description: 'Target branch name'
-        required: false
-        default: 'main'
-        type: string
+      # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
       BRANCH_NAME:
         description: 'Branch name to checkout'
-        required: true
+        required: false
         type: string
       VIRTUALENV_PATH:
         description: 'Virtualenv path'
