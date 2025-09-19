@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: intel/mfd
-          ref: main
+          ref: source-path-installation
           path: common_actions
       - uses: ./common_actions/.github/prepare_test_env
         with:
