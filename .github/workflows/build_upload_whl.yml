@@ -71,8 +71,9 @@ jobs:
       - name: Run mfd-create-config-files
         run: |
           pip install -r requirements-dev.txt
+          pip install .
           mfd-create-config-files --project-dir .
-        
+
       - name: Check if bump version is expected
         run: |
           if [ "${{ inputs.RELEASE_BUILD }}" = "false" ]; then
