@@ -22,6 +22,7 @@ on:
         required: false
         default: 'ubuntu-latest'
         type: string
+      # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
       SOURCE_PATH:
         description: 'Path to the source code directory'
         required: false
@@ -52,14 +53,12 @@ jobs:
     steps:
     - name: Checkout this repository
       uses: actions/checkout@v4
-      with:
-        path: ${{ inputs.SOURCE_PATH }}
     - name: Determine if unit and functional tests should run
       id: tests_path_existence
       shell: bash
       run: |
-          UNIT_TEST_DIR="${{ inputs.SOURCE_PATH }}/tests/unit/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
-          FUNC_TEST_DIR="${{ inputs.SOURCE_PATH }}/tests/system/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
+          UNIT_TEST_DIR="tests/unit/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
+          FUNC_TEST_DIR="tests/system/test_$(echo "${{ inputs.PROJECT_NAME }}" | tr '-' '_')"
 
           if [ -d "$UNIT_TEST_DIR" ]; then
           echo "Unit tests directory exists: $UNIT_TEST_DIR"
@@ -87,7 +86,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: intel/mfd
-        ref: main
+        ref: delete-source-path
         path: common_actions
     - uses: ./common_actions/.github/prepare_test_env
       with:
@@ -96,7 +95,6 @@ jobs:
       shell: bash
       run: |
         source ${{ inputs.VIRTUALENV_PATH }}/*/activate
-        pushd ${{ inputs.SOURCE_PATH }}
         mfd-system-tests --project-dir .
 
   run_ut_tests:
@@ -109,7 +107,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: intel/mfd
-        ref: main
+        ref: delete-source-path
         path: common_actions
     - uses: ./common_actions/.github/prepare_test_env
       with:
@@ -119,7 +117,6 @@ jobs:
       run: |
         source ${{ inputs.VIRTUALENV_PATH }}/*/activate
         python --version
-        pushd ${{ inputs.SOURCE_PATH }}
         mfd-unit-tests-with-coverage --project-dir .
 
     - name: Coveralls GitHub Action

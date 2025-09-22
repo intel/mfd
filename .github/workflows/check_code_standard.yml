@@ -12,6 +12,7 @@ on:
         required: false
         default: '3.10.11'
         type: string
+      # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
       SOURCE_PATH:
         description: 'Path to the source code directory'
         required: false
@@ -44,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: intel/mfd
-          ref: main
+          ref: delete-source-path
           path: common_actions
       - uses: ./common_actions/.github/prepare_test_env
         with:
@@ -55,4 +56,4 @@ jobs:
         shell: bash
         run: |
           source ${{ github.workspace }}/${{ inputs.VIRTUALENV_PATH }}/*/activate
-          mfd-code-standard --project-dir ${{ github.workspace }}/${{ inputs.SOURCE_PATH }}
+          mfd-code-standard --project-dir ${{ github.workspace }}

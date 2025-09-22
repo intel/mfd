@@ -11,11 +11,6 @@ on:
         required: false
         type: string
         default: "ubuntu-latest"
-      SOURCE_PATH:
-        description: 'Path to the source code directory'
-        required: false
-        default: 'src'
-        type: string
       REPOSITORY_NAME:
         description: 'Repository name'
         required: false

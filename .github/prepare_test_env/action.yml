@@ -3,6 +3,7 @@ inputs:
   PYTHON_VERSION:
     description: 'Python version to use'
     required: true
+  # TODO - this field is not used in the action anywhere, remove it after updating workflows actually passing it (e.g mfd-const)
   SOURCE_PATH:
     description: 'Path to the source code directory'
     required: false
@@ -30,7 +31,6 @@ runs:
   - name: Checkout main repository
     uses: actions/checkout@v4
     with:
-      path: ${{ inputs.SOURCE_PATH }}
       fetch-depth: 0
   - name: Set up Python
     uses: actions/setup-python@v5
@@ -45,6 +45,6 @@ runs:
       python -m venv ${{ inputs.VIRTUALENV_PATH }}
       source ${{ inputs.VIRTUALENV_PATH }}/*/activate
       python --version
-      pip install -r ${{ inputs.SOURCE_PATH }}/requirements-test.txt
-      pip install -r ${{ inputs.SOURCE_PATH }}/requirements-dev.txt
-      pip install -r ${{ inputs.SOURCE_PATH }}/requirements.txt
+      pip install -r requirements-test.txt
+      pip install -r requirements-dev.txt
+      pip install -r requirements.txt
