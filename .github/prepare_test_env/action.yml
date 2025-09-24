@@ -45,6 +45,7 @@ runs:
       python -m venv ${{ inputs.VIRTUALENV_PATH }}
       source ${{ inputs.VIRTUALENV_PATH }}/*/activate
       python --version
+      pip install ./${{ inputs.SOURCE_PATH }}
       pip install -r ${{ inputs.SOURCE_PATH }}/requirements-test.txt
       pip install -r ${{ inputs.SOURCE_PATH }}/requirements-dev.txt
       pip install -r ${{ inputs.SOURCE_PATH }}/requirements.txt
