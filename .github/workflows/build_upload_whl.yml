@@ -128,7 +128,7 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           script: |
             const prNumber = context.payload.pull_request.number;
-            const commentBody = "We don't publish DEVs .whl.\n To build .whl, run 'pip install git+https://${{ inputs.REPOSITORY_NAME }}@${{ inputs.BRANCH_NAME }}'";
+            const commentBody = "We don't publish DEVs .whl.\n To build .whl, run 'pip install git+https://github.com/${{ inputs.REPOSITORY_NAME }}@${{ inputs.BRANCH_NAME }}'";
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
