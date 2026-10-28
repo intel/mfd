@@ -62,3 +62,4 @@ jobs:
     with:
       REPOSITORY_NAME: ${{ inputs.REPOSITORY_NAME }}
       BRANCH_NAME: ${{ inputs.BRANCH_NAME }}
+      PYTHON_VERSION: ${{ inputs.PYTHON_VERSION || '3.10.11' }}
