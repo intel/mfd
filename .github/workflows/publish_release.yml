@@ -24,6 +24,11 @@ on:
         description: 'Branch name to checkout'
         required: true
         type: string
+      PYTHON_VERSION:
+        description: 'Python version to use'
+        required: false
+        default: '3.10.11'
+        type: string
 
 
 jobs:
@@ -37,9 +42,13 @@ jobs:
         token: ${{ secrets.GH_TOKEN }}
         ref: ${{ inputs.BRANCH_NAME }}
         repository: ${{ inputs.REPOSITORY_NAME }}
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.PYTHON_VERSION }}
     - name: Run mfd-create-config-files
       run: |
-        pip install -r requirements-dev.txt
+        python -m pip install -r requirements-dev.txt
         mfd-create-config-files --project-dir .
     - name: Run python-semantic-release
       id: semantic_release
